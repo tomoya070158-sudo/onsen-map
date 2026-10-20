@@ -1,5 +1,5 @@
 // App shell is cached for offline use; data/onsen.json is fetched fresh and falls back to cache.
-const CACHE = "yukemuri-v1";
+const CACHE = "yukemuri-v2";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png",
   "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"];
 
