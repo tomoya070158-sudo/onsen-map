@@ -5,17 +5,26 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 
 const OVERPASS = process.env.OVERPASS_URL || "https://overpass-api.de/api/interpreter";
 const PREFS_URL = "https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson";
-const QUERY = `[out:json][timeout:600];
+const QUERY = `[out:json][timeout:900];
 area["ISO3166-1"="JP"][admin_level=2]->.jp;
 (
   nwr["amenity"="public_bath"](area.jp);
   nwr["natural"="hot_spring"](area.jp);
   nwr["bath:type"="onsen"](area.jp);
+  nwr["amenity"="spa"](area.jp);
+  nwr["leisure"~"^(spa|resort|water_park|sauna)$"]["name"~"温泉|の湯|湯$|スパ|SPA|Spa"](area.jp);
+  nwr["tourism"~"^(hotel|guest_house|motel|hostel|resort)$"]["name"~"温泉"](area.jp);
+  nwr["name"~"天然温泉|日帰り温泉|日帰り入浴|健康ランド|スーパー銭湯"](area.jp);
 );
 out center tags;`;
 
+// Things that merely carry an onsen name (stations, roads, car parks, shops) are not places to bathe.
+const NOT_A_BATH = ["highway", "railway", "public_transport", "shop", "place", "boundary", "landuse", "route", "office"];
+const NOT_A_BATH_AMENITY = /^(parking|parking_entrance|bus_station|toilets|fuel|restaurant|cafe|fast_food|post_box|vending_machine|bicycle_parking|townhall|school)$/;
+
 function kindOf(t) {
-  if (t["bath:type"] === "onsen" || /温泉/.test(t.name || "")) return "温泉施設";
+  if (t.tourism && t.amenity !== "public_bath") return "温泉宿";
+  if (t["bath:type"] === "onsen" || /温泉|の湯|スパ|健康ランド/i.test(t.name || "") || t.leisure || t.amenity === "spa") return "温泉施設";
   if (t.natural === "hot_spring") return "源泉・湯けむり";
   if (/銭湯/.test(t.name || "") || t["bath:type"] === "sento") return "銭湯";
   return "公衆浴場";
@@ -63,6 +72,8 @@ const seen = new Set();
 const items = [];
 for (const el of data.elements) {
   const t = el.tags || {};
+  if (NOT_A_BATH.some(k => t[k]) && t.amenity !== "public_bath" && t.natural !== "hot_spring") continue;
+  if (NOT_A_BATH_AMENITY.test(t.amenity || "")) continue;
   const lat = el.lat ?? el.center?.lat, lng = el.lon ?? el.center?.lon;
   if (lat == null) continue;
   const name = t["name:ja"] || t.name || (t.natural === "hot_spring" ? "源泉（名称なし）" : "温泉施設（名称なし）");
