@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "0 18 * * 0" # 毎週月曜 3:00 (JST)
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["data/extra-places.json", "scripts/fetch-onsen.mjs"]
 
 permissions:
   contents: write

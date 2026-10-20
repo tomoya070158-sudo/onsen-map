@@ -83,6 +83,23 @@ for (const el of data.elements) {
   const website = t.website || t["contact:website"] || "";
   items.push([name, +lat.toFixed(5), +lng.toFixed(5), kindOf(t), prefOf(lng, lat), website, `${el.type}/${el.id}`]);
 }
+// data/extra-places.json: places OpenStreetMap is missing, added by hand as name + address.
+// Addresses are turned into coordinates with the GSI (国土地理院) address search.
+async function geocode(address) {
+  const r = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(address)}`);
+  if (!r.ok) return null;
+  const [hit] = await r.json();
+  return hit ? { lng: hit.geometry.coordinates[0], lat: hit.geometry.coordinates[1] } : null;
+}
+let extras = [];
+try { extras = JSON.parse(await readFile("data/extra-places.json", "utf8")); } catch {}
+for (const p of extras) {
+  const pos = p.lat != null ? { lat: p.lat, lng: p.lng } : await geocode(p.address);
+  if (!pos) { console.error(`could not place ${p.name} (${p.address})`); continue; }
+  items.push([p.name, +pos.lat.toFixed(5), +pos.lng.toFixed(5), p.kind || "温泉施設", prefOf(pos.lng, pos.lat), p.website || "", ""]);
+}
+console.log(`added ${extras.length} hand-listed places`);
+
 const updated = new Date().toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" });
 await mkdir("data", { recursive: true });
 await writeFile("data/onsen.json", JSON.stringify({ updated, source: "© OpenStreetMap contributors (ODbL)", items }));

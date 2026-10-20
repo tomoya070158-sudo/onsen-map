@@ -942,7 +942,7 @@ function showDetail(it){
       <a class="act" href="https://www.google.com/search?q=${q}%20${p}%20日帰り入浴" target="_blank" rel="noopener">日帰り入浴を調べる</a>
       ${it.website ? `<a class="act wide" href="${esc(it.website)}" target="_blank" rel="noopener">公式サイト</a>` : ""}
     </div>
-    <div class="note">${it.src==="sample" ? "地図上の位置は温泉街のおおよその中心です。" : `地図データ：<a href="https://www.openstreetmap.org/${it.osm}" target="_blank" rel="noopener">OpenStreetMap</a>。営業時間や料金は公式情報をご確認ください。`}</div>`;
+    <div class="note">${it.src==="sample" ? "地図上の位置は温泉街のおおよその中心です。" : !it.osm ? "地図上の位置は住所から求めたおおよその場所です。" : `地図データ：<a href="https://www.openstreetmap.org/${it.osm}" target="_blank" rel="noopener">OpenStreetMap</a>。営業時間や料金は公式情報をご確認ください。`}</div>`;
   $("#listView").style.display = "none"; $("#detail").hidden = false;
   $("#backBtn").addEventListener("click", closeDetail);
   setSheet(isWide() ? "peek" : "detail");
