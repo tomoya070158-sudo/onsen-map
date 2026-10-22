@@ -736,6 +736,9 @@ button{font:inherit;color:inherit}
 .handle span{display:block;width:40px;height:5px;border-radius:3px;background:var(--line)}
 .sheethead{flex:none;display:flex;align-items:baseline;gap:8px;padding:2px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
 .sheethead b{font-size:16px}
+.sheethead{touch-action:none}
+.sizebtn{position:absolute;top:6px;right:max(12px,env(safe-area-inset-right,0px));z-index:2;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer;min-height:32px}
+.sheet[data-state="mini"] .sizebtn{color:var(--accent);border-color:var(--accent)}
 .sheethead span{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
 .list{list-style:none;margin:0;padding:0;overflow:auto;min-height:0;flex:1;overscroll-behavior:contain}
 .item{display:flex;align-items:center;gap:12px;padding:11px max(16px,env(safe-area-inset-right,0px)) 11px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);cursor:pointer;min-height:56px}
@@ -798,6 +801,7 @@ button{font:inherit;color:inherit}
   .sheet,.sheet[data-state]{position:relative;grid-column:1;grid-row:2;inset:auto;height:auto;max-height:none;border-radius:0;box-shadow:none;background:transparent}
   .handle{display:none}
   .sheethead{padding-top:12px}
+  .sizebtn{display:none}
   .item{border-radius:10px;border-top:0;margin:0 8px}
   .fab{top:auto;bottom:20px;right:20px}
   .toast{bottom:24px;left:calc(50% + 200px)}
@@ -827,6 +831,7 @@ button{font:inherit;color:inherit}
 
   <section class="sheet" id="sheet" data-state="peek" aria-label="温泉の一覧">
     <button class="handle" id="handle" type="button" aria-label="一覧を広げる・縮める"><span></span></button>
+    <button class="sizebtn" id="sizeBtn" type="button">小さく ⌄</button>
     <div id="listView" style="display:flex;flex-direction:column;min-height:0;flex:1">
       <div class="home" id="home">
         <button class="nearbtn" id="nearBtn" type="button">
@@ -890,7 +895,9 @@ const sheet = $("#sheet");
 function sheetHeight(){ return isWide() ? 0 : sheet.getBoundingClientRect().height; }
 function setSheet(state){
   sheet.dataset.state = state; $("#app").dataset.sheet = state;
+  $("#sizeBtn").textContent = state==="mini" ? "一覧を見る ⌃" : "小さく ⌄";
 }
+$("#sizeBtn").addEventListener("click", () => setSheet(sheet.dataset.state==="mini" ? "peek" : "mini"));
 // --sheet-h / --top-h follow the real sizes so map controls and toasts never hide behind them.
 const syncSizes = () => {
   document.documentElement.style.setProperty("--sheet-h", isWide() ? "0px" : sheet.getBoundingClientRect().height+"px");
@@ -904,20 +911,22 @@ function stepSheet(dir){
   if (sheet.dataset.state==="detail" && dir>0) return setSheet("full");
   setSheet(ORDER[Math.max(0, Math.min(2, ORDER.indexOf(cur)+dir))]);
 }
-$("#handle").addEventListener("click", ()=> { if (!dragMoved) stepSheet(sheet.dataset.state==="full" ? -1 : 1); });
+$("#handle").addEventListener("click", ()=> { if (Date.now()-lastDragAt > 500) stepSheet(sheet.dataset.state==="full" ? -1 : 1); });
 // Swipe the sheet's top edge up or down to open or lower the list.
-let dragY = null, dragMoved = false;
-for (const el of [$("#handle"), $("#sheethead")]) {
-  el.addEventListener("pointerdown", e => { dragY = e.clientY; dragMoved = false; });
-}
-addEventListener("pointermove", e => { if (dragY!=null && Math.abs(e.clientY-dragY) > 8) dragMoved = true; });
-addEventListener("pointerup", e => {
+let dragY = null, lastDragAt = 0;
+const dragStart = y => { dragY = y; };
+const dragEnd = y => {
   if (dragY==null) return;
-  const dy = e.clientY - dragY; dragY = null;
-  if (Math.abs(dy) > 30) stepSheet(dy < 0 ? 1 : -1);
-  setTimeout(()=>dragMoved = false, 0);
-});
-map.on("dragstart", ()=>{ if (sheet.dataset.state==="full") setSheet("peek"); areaPref = ""; browsed = true; });
+  const dy = y - dragY; dragY = null;
+  if (Math.abs(dy) > 30) { lastDragAt = Date.now(); stepSheet(dy < 0 ? 1 : -1); }
+};
+for (const el of [$("#handle"), $("#sheethead")]) {
+  el.addEventListener("touchstart", e => dragStart(e.touches[0].clientY), {passive:true});
+  el.addEventListener("touchend", e => dragEnd(e.changedTouches[0].clientY));
+  el.addEventListener("mousedown", e => dragStart(e.clientY));
+}
+addEventListener("mouseup", e => dragEnd(e.clientY));
+map.on("dragstart", ()=>{ if (sheet.dataset.state==="full" || sheet.dataset.state==="peek") setSheet("mini"); areaPref = ""; browsed = true; });
 map.on("zoomstart", e=>{ if (!flying) browsed = true; });
 
 // Fly so the point lands in the visible part of the map, above the sheet.
