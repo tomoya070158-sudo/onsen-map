@@ -746,6 +746,20 @@ button{font:inherit;color:inherit}
 .item .meta{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item .dist{flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .empty{padding:20px 16px;color:var(--muted)}
+.home{flex:1;min-height:0;overflow:auto;padding:4px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.nearbtn{display:flex;align-items:center;gap:12px;text-align:left;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);padding:14px 16px;cursor:pointer}
+.nearbtn b{display:block;font-size:17px}
+.nearbtn small{display:block;font-size:12px;opacity:.85}
+.homelabel{font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.region{display:flex;flex-direction:column;gap:6px}
+.region h3{margin:0;font-size:12px;color:var(--muted);font-weight:500}
+.region div{display:flex;flex-wrap:wrap;gap:6px}
+.pref{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer;min-height:40px}
+.pref .n{color:var(--muted);font-size:11px;margin-left:4px;font-variant-numeric:tabular-nums}
+.sheethead .back{border:0;background:transparent;color:var(--accent);font-size:22px;line-height:1;padding:0 6px 0 0;cursor:pointer;align-self:center}
+.app[data-home="1"] .sheet[data-state="peek"]{height:56vh}
+.app[data-home="1"] #sheethead,.app[data-home="1"] #list{display:none}
+.app:not([data-home="1"]) #home{display:none}
 
 /* Detail */
 .detail{flex:1;min-height:0;overflow:auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
@@ -803,7 +817,15 @@ button{font:inherit;color:inherit}
   <section class="sheet" id="sheet" data-state="peek" aria-label="温泉の一覧">
     <button class="handle" id="handle" type="button" aria-label="一覧を広げる・縮める"><span></span></button>
     <div id="listView" style="display:flex;flex-direction:column;min-height:0;flex:1">
-      <div class="sheethead"><b id="listTitle">この周辺の温泉</b><span id="count"></span></div>
+      <div class="home" id="home">
+        <button class="nearbtn" id="nearBtn" type="button">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+          <span><b>近くの温泉をさがす</b><small>今いる場所から近い順に並べます</small></span>
+        </button>
+        <div class="homelabel">都道府県からさがす</div>
+        <div class="prefs" id="prefs"></div>
+      </div>
+      <div class="sheethead" id="sheethead"><button class="back" type="button" id="homeBtn" hidden>‹</button><b id="listTitle">この周辺の温泉</b><span id="count"></span></div>
       <ul class="list" id="list"></ul>
     </div>
     <div class="detail" id="detail" hidden></div>
@@ -830,6 +852,7 @@ const isWide = () => matchMedia("(min-width:820px)").matches;
 // mode: "sample" (embedded list), "snapshot" (data/onsen.json + famous areas), "live" (Overpass per map view)
 let mode = "sample", live = false, items = SAMPLE.slice(), tagFilter = "すべて", keyword = "", selected = null, here = null, snapshotDate = "";
 const markers = new Map();
+let areaPref = "", browsed = false, flying = false;
 
 const map = L.map("map", {zoomControl:false, attributionControl:false, preferCanvas:true, minZoom:4}).setView([37.2, 137.8], 5);
 L.control.attribution({position:"bottomleft", prefix:false}).addTo(map);
@@ -860,12 +883,14 @@ function setSheet(state){
   setTimeout(()=>document.documentElement.style.setProperty("--sheet-h", isWide() ? "0px" : sheet.getBoundingClientRect().height+"px"), 280);
 }
 $("#handle").addEventListener("click", ()=> setSheet(sheet.dataset.state==="full" ? "peek" : sheet.dataset.state==="detail" ? "peek" : "full"));
-map.on("dragstart", ()=>{ if (sheet.dataset.state==="full") setSheet("peek"); });
+map.on("dragstart", ()=>{ if (sheet.dataset.state==="full") setSheet("peek"); areaPref = ""; browsed = true; });
+map.on("zoomstart", e=>{ if (!flying) browsed = true; });
 
 // Fly so the point lands in the visible part of the map, above the sheet.
 function flyVisible(latlng, zoom){
   const off = sheetHeight()/2;
   const p = map.project(latlng, zoom).add([0, off]);
+  flying = true; map.once("moveend", ()=>{ flying = false; });
   map.flyTo(map.unproject(p, zoom), zoom, {duration:.6});
 }
 
@@ -886,9 +911,10 @@ function filtered(){
 // The list follows the map: keyword hits across Japan, otherwise what is on screen, nearest first.
 function listItems(all){
   const b = map.getBounds(), ref = here || map.getCenter();
-  let arr = keyword ? all : all.filter(it => b.contains([it.lat,it.lng]));
-  // Famous onsen areas lead keyword results so "草津" finds 草津温泉 before a footbath.
-  arr = arr.map(it => ({it, d:km(ref,it)})).sort((a,b)=> keyword ? (b.it.src==="sample")-(a.it.src==="sample") || a.d-b.d : a.d-b.d);
+  let arr = keyword ? all : areaPref ? all.filter(it => (it.pref||"").startsWith(areaPref)) : all.filter(it => b.contains([it.lat,it.lng]));
+  // Famous onsen areas lead keyword and prefecture lists so "草津" finds 草津温泉 before a footbath.
+  const famFirst = keyword || areaPref;
+  arr = arr.map(it => ({it, d:km(ref,it)})).sort((a,b)=> famFirst ? (b.it.src==="sample")-(a.it.src==="sample") || a.d-b.d : a.d-b.d);
   return {total:arr.length, rows:arr.slice(0, LIST_MAX)};
 }
 
@@ -917,9 +943,12 @@ function render(){
 
 function renderList(all = filtered()){
   const {total, rows} = listItems(all);
-  $("#listTitle").textContent = keyword ? `「${keyword}」の検索結果` : here ? "近くの温泉" : "この周辺の温泉";
-  $("#count").textContent = `${total.toLocaleString()}件` + (total>LIST_MAX ? `（近い順に${LIST_MAX}件）` : "");
-  $("#list").innerHTML = rows.length ? rows.map(({it,d}) => `<li class="item" tabindex="0" data-id="${it.id}"><span class="dot${it.src==="sample"?" fam":""}"></span><span class="txt"><div class="name">${esc(it.name)}</div><div class="meta">${esc([it.pref, it.src==="sample" ? it.spring : it.tag].filter(Boolean).join(" ・ "))}</div></span>${(here||!keyword)?`<span class="dist">${fmtKm(d)}</span>`:""}</li>`).join("")
+  const homeNow = showHome() ? "1" : "";
+  if ($("#app").dataset.home !== homeNow) { $("#app").dataset.home = homeNow; setSheet(sheet.dataset.state); }
+  $("#homeBtn").hidden = !(areaPref || keyword || here || browsed);
+  $("#listTitle").textContent = keyword ? `「${keyword}」の検索結果` : areaPref ? `${areaPref}の温泉` : here ? "近くの温泉" : "この周辺の温泉";
+  $("#count").textContent = `${total.toLocaleString()}件` + (total>LIST_MAX ? `（${areaPref&&!here?"有名どころから":"近い順に"}${LIST_MAX}件）` : "");
+  $("#list").innerHTML = rows.length ? rows.map(({it,d}) => `<li class="item" tabindex="0" data-id="${it.id}"><span class="dot${it.src==="sample"?" fam":""}"></span><span class="txt"><div class="name">${esc(it.name)}</div><div class="meta">${esc([it.pref, it.src==="sample" ? it.spring : it.tag].filter(Boolean).join(" ・ "))}</div></span>${(here||(!keyword&&!areaPref))?`<span class="dist">${fmtKm(d)}</span>`:""}</li>`).join("")
     : `<li class="empty">${keyword||tagFilter!=="すべて" ? "条件に合う温泉が見つかりません。言葉や絞り込みを変えてみてください。" : "この範囲には温泉がありません。地図を動かすか、縮小してみてください。"}</li>`;
 }
 map.on("moveend", ()=>{ if (!selected) renderList(); });
@@ -988,18 +1017,45 @@ $("#searchForm").addEventListener("submit", async e => {
   } catch { toast("場所の検索に失敗しました。少し待ってからもう一度お試しください"); }
 });
 
-$("#locBtn").addEventListener("click", () => {
-  if (!navigator.geolocation) { toast("この端末では現在地を使えません"); return; }
-  toast("現在地を確認しています…", 0);
+$("#locBtn").addEventListener("click", () => locate());
+$("#nearBtn").addEventListener("click", () => locate());
+function locate(quiet){
+  if (!navigator.geolocation) { if (!quiet) toast("この端末では現在地を使えません"); return; }
+  if (!quiet) toast("現在地を確認しています…", 0);
   navigator.geolocation.getCurrentPosition(pos => {
     here = {lat:pos.coords.latitude, lng:pos.coords.longitude}; toast("");
     hereMarker?.remove();
     hereMarker = L.circleMarker([here.lat,here.lng], {radius:8, color:"#ffffff", weight:3, fillColor:"#2f7cf6", fillOpacity:1}).addTo(map).bindTooltip("現在地");
     if (selected) closeDetail();
-    keyword = ""; $("#q").value = "";
+    keyword = ""; $("#q").value = ""; areaPref = "";
     flyVisible([here.lat,here.lng], mode==="sample" && !live ? 8 : 11);
     map.once("moveend", ()=>{ if (mode==="live") searchArea(); else render(); });
-  }, () => toast("現在地を取得できませんでした。位置情報の許可を確認してください"), {enableHighAccuracy:true, timeout:10000});
+  }, () => { if (!quiet) toast("現在地を取得できませんでした。位置情報の許可を確認してください"); }, {enableHighAccuracy:true, timeout:10000});
+}
+
+/* ---------- home: nearby + prefectures ---------- */
+const REGIONS = [["北海道・東北",["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県"]],["関東",["茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県"]],
+  ["中部",["新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県"]],["近畿",["三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県"]],
+  ["中国・四国",["鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県"]],["九州・沖縄",["福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"]]];
+const showHome = () => !keyword && !areaPref && !here && !browsed && !selected;
+function renderPrefs(){
+  const counts = {};
+  items.forEach(it => { const p = (it.pref||"").match(/^.+?[都道府県]/)?.[0]; if (p) counts[p] = (counts[p]||0)+1; });
+  $("#prefs").innerHTML = REGIONS.map(([r, ps]) => `<div class="region"><h3>${r}</h3><div>${ps.map(p => `<button class="pref" type="button" data-p="${p}">${p.replace(/[県府都]$/,"").replace(/^東京$/,"東京")}<span class="n">${(counts[p]||0).toLocaleString()}</span></button>`).join("")}</div></div>`).join("");
+}
+$("#prefs").addEventListener("click", e => {
+  const b = e.target.closest(".pref"); if (!b) return;
+  areaPref = b.dataset.p; keyword = ""; $("#q").value = "";
+  const f = JAPAN.features.find(f => f.properties.n === areaPref);
+  const pts = items.filter(it => (it.pref||"").startsWith(areaPref)).map(it => [it.lat,it.lng]);
+  const bounds = f ? L.geoJSON(f).getBounds() : pts.length ? L.latLngBounds(pts) : null;
+  render();
+  if (bounds) { flying = true; map.flyToBounds(bounds, {duration:.6, paddingBottomRight:[0, sheetHeight()], paddingTopLeft:[0, isWide()?0:160]}); map.once("moveend", ()=>{ flying = false; }); }
+});
+$("#homeBtn").addEventListener("click", () => {
+  areaPref = ""; keyword = ""; $("#q").value = ""; here = null; browsed = false; hereMarker?.remove();
+  flying = true; map.flyTo([37.2, 137.8], 5, {duration:.6}); map.once("moveend", ()=>{ flying = false; render(); });
+  render();
 });
 
 function kindOf(t){
@@ -1068,7 +1124,9 @@ async function start(){
   } else {
     $("#srcnote").textContent = `プレビュー版・${SAMPLE.length}か所`;
   }
-  renderChips(); render();
+  renderChips(); renderPrefs(); render();
+  // If location was allowed before, go straight to what is nearby.
+  try { const st = await navigator.permissions?.query({name:"geolocation"}); if (st?.state === "granted") locate(true); } catch {}
 }
 start();
 addEventListener("resize", ()=>setSheet(sheet.dataset.state));
