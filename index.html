@@ -728,7 +728,7 @@ button{font:inherit;color:inherit}
 .fab{position:absolute;z-index:1002;transition:opacity .2s;right:max(12px,env(safe-area-inset-right,0px));top:calc(var(--top-h) + 22px);
   display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--panel);color:var(--accent);box-shadow:var(--shadow);padding:10px 14px;font-weight:700;cursor:pointer}
 .areabtn{position:absolute;z-index:1000;left:50%;transform:translateX(-50%);top:calc(150px + env(safe-area-inset-top,0px));border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow);padding:9px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
-.toast{position:absolute;z-index:1100;left:50%;transform:translateX(-50%);bottom:calc(var(--sheet-h) + 64px);background:var(--ink);color:var(--panel);border-radius:999px;padding:8px 14px;font-size:13px;max-width:calc(100% - 32px);text-align:center}
+.toast{position:absolute;z-index:1100;left:50%;transform:translateX(-50%);bottom:calc(var(--sheet-h) + 64px);background:var(--ink);color:var(--panel);border-radius:999px;padding:8px 14px;font-size:13px;width:max-content;max-width:calc(100% - 32px);text-align:center}
 
 /* Bottom sheet */
 .sheet{position:absolute;z-index:1001;left:0;right:0;bottom:0;height:40vh;height:40dvh;transition:height .25s ease;background:var(--panel);border-radius:18px 18px 0 0;box-shadow:0 -4px 20px rgba(20,32,56,.12);display:flex;flex-direction:column;min-height:0;padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -736,7 +736,7 @@ button{font:inherit;color:inherit}
 .handle span{display:block;width:40px;height:5px;border-radius:3px;background:var(--line)}
 .sheethead{flex:none;display:flex;align-items:baseline;gap:8px;padding:2px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
 .sheethead b{font-size:16px}
-.sheethead{touch-action:none}
+.sheethead{touch-action:none;flex-wrap:wrap;row-gap:2px;padding-right:110px}
 .sizebtn{position:absolute;top:6px;right:max(12px,env(safe-area-inset-right,0px));z-index:2;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer;min-height:32px}
 .sheet[data-state="mini"] .sizebtn{color:var(--accent);border-color:var(--accent)}
 .sheethead span{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
@@ -775,7 +775,7 @@ button{font:inherit;color:inherit}
 .app:not([data-home="1"]) #home{display:none}
 
 /* Detail */
-.detail{flex:1;min-height:0;overflow:auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
+.detail{flex:1;min-height:0;overflow:auto;padding:4px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
 .back{align-self:flex-start;border:0;background:transparent;color:var(--accent);font-weight:700;padding:2px 0;cursor:pointer}
 .detail h2{margin:0;font-family:var(--f-display);font-size:22px;line-height:1.35;text-wrap:balance}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
@@ -786,6 +786,11 @@ button{font:inherit;color:inherit}
 .act.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .act.stay{background:var(--hot);border-color:var(--hot);color:var(--hot-ink)}
 .act.wide{grid-column:1/-1}
+.subacts{display:flex;gap:8px}
+.subact{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:8px 12px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;min-height:40px}
+.subact[aria-pressed="true"]{background:color-mix(in srgb,var(--gold,#e0a100) 18%,var(--panel));border-color:var(--gold,#e0a100);color:var(--ink)}
+.item .fav{flex:none;color:var(--gold,#e0a100);font-size:14px}
+.chip.favchip[aria-pressed="false"]{border-color:color-mix(in srgb,var(--gold,#e0a100) 55%,var(--line))}
 .note{font-size:12px;color:var(--muted)}
 
 .app[data-sheet="full"] .fab{opacity:0;pointer-events:none}
@@ -802,6 +807,7 @@ button{font:inherit;color:inherit}
   .handle{display:none}
   .sheethead{padding-top:12px}
   .sizebtn{display:none}
+  .sheethead{padding-right:16px}
   .item{border-radius:10px;border-top:0;margin:0 8px}
   .fab{top:auto;bottom:20px;right:20px}
   .toast{bottom:24px;left:calc(50% + 200px)}
@@ -860,6 +866,7 @@ const FAMOUS = "有名温泉地";
 const OVERPASS = "https://overpass-api.de/api/interpreter";
 const NOMINATIM = "https://nominatim.openstreetmap.org/search";
 const LIST_MAX = 200;
+const FAVS = "★ 行きたい";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -886,6 +893,17 @@ function km(a, b){
   return 12742*Math.asin(Math.sqrt(h));
 }
 const fmtKm = d => d < 10 ? d.toFixed(1)+"km" : Math.round(d)+"km";
+
+// 「行きたい」リストは端末に保存。データ更新でidが変わっても残るよう、名前と位置で覚える。
+const favKey = it => `${it.name}@${(+it.lat).toFixed(3)},${(+it.lng).toFixed(3)}`;
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem("favs")||"[]")); } catch {}
+const isFav = it => favs.has(favKey(it));
+function toggleFav(it){
+  const k = favKey(it); favs.has(k) ? favs.delete(k) : favs.add(k);
+  try { localStorage.setItem("favs", JSON.stringify([...favs])); } catch {}
+  renderChips();
+}
 
 let toastTimer;
 function toast(t, ms=2600){ const el = $("#toast"); clearTimeout(toastTimer); el.hidden = !t; el.textContent = t||""; if (t && ms) toastTimer = setTimeout(()=>el.hidden=true, ms); }
@@ -947,7 +965,7 @@ function stayUrl(it){
 /* ---------- data views ---------- */
 function filtered(){
   const k = keyword.toLowerCase();
-  return items.filter(it => (tagFilter==="すべて" || it.tag===tagFilter) &&
+  return items.filter(it => (tagFilter==="すべて" || it.tag===tagFilter || (tagFilter===FAVS && isFav(it))) &&
     (!k || (it.name+(it.pref||"")+(it.tag||"")).toLowerCase().includes(k)));
 }
 
@@ -964,9 +982,11 @@ function listItems(all){
 function renderChips(){
   const counts = {};
   items.forEach(it => counts[it.tag] = (counts[it.tag]||0)+1);
-  const tags = ["すべて", ...Object.keys(counts).sort((a,b)=>(b===FAMOUS)-(a===FAMOUS) || counts[b]-counts[a])];
+  const nFav = items.filter(isFav).length;
+  if (nFav) counts[FAVS] = nFav;
+  const tags = ["すべて", ...(nFav ? [FAVS] : []), ...Object.keys(counts).filter(t=>t!==FAVS).sort((a,b)=>(b===FAMOUS)-(a===FAMOUS) || counts[b]-counts[a])];
   if (!tags.includes(tagFilter)) tagFilter = "すべて";
-  $("#chips").innerHTML = tags.map(t => `<button type="button" class="chip${t===FAMOUS?" fam":""}" aria-pressed="${t===tagFilter}" data-t="${esc(t)}">${t===FAMOUS?"♨ ":""}${esc(t)}<span class="n">${(t==="すべて"?items.length:counts[t]).toLocaleString()}</span></button>`).join("");
+  $("#chips").innerHTML = tags.map(t => `<button type="button" class="chip${t===FAMOUS?" fam":t===FAVS?" favchip":""}" aria-pressed="${t===tagFilter}" data-t="${esc(t)}">${t===FAMOUS?"♨ ":""}${esc(t)}<span class="n">${(t==="すべて"?items.length:counts[t]).toLocaleString()}</span></button>`).join("");
 }
 
 // Facilities go into a cluster layer (numbered bubbles that open on tap); famous areas stay as ♨ pins on top.
@@ -1004,9 +1024,9 @@ function renderList(all = filtered()){
   const homeNow = showHome() ? "1" : "";
   if ($("#app").dataset.home !== homeNow) { $("#app").dataset.home = homeNow; setSheet(sheet.dataset.state); }
   $("#homeBtn").hidden = !(areaPref || keyword || here || browsed);
-  $("#listTitle").textContent = keyword ? `「${keyword}」の検索結果` : areaPref ? `${areaPref}の温泉` : here ? "近くの温泉" : "この周辺の温泉";
+  $("#listTitle").textContent = tagFilter===FAVS && !keyword ? "行きたい温泉" : keyword ? `「${keyword}」の検索結果` : areaPref ? `${areaPref}の温泉` : here ? "近くの温泉" : "この周辺の温泉";
   $("#count").textContent = `${total.toLocaleString()}件` + (total>LIST_MAX ? `（${areaPref&&!here?"有名どころから":"近い順に"}${LIST_MAX}件）` : "");
-  $("#list").innerHTML = rows.length ? rows.map(({it,d}) => `<li class="item" tabindex="0" data-id="${it.id}"><span class="dot${it.src==="sample"?" fam":""}"></span><span class="txt"><div class="name">${esc(it.name)}</div><div class="meta">${esc([it.pref, it.src==="sample" ? it.spring : it.tag].filter(Boolean).join(" ・ "))}</div></span>${(here||(!keyword&&!areaPref))?`<span class="dist">${fmtKm(d)}</span>`:""}</li>`).join("")
+  $("#list").innerHTML = rows.length ? rows.map(({it,d}) => `<li class="item" tabindex="0" data-id="${it.id}"><span class="dot${it.src==="sample"?" fam":""}"></span><span class="txt"><div class="name">${esc(it.name)}</div><div class="meta">${esc([it.pref, it.src==="sample" ? it.spring : it.tag].filter(Boolean).join(" ・ "))}</div></span>${isFav(it)?`<span class="fav" aria-label="行きたい">★</span>`:""}${(here||(!keyword&&!areaPref&&tagFilter!==FAVS))?`<span class="dist">${fmtKm(d)}</span>`:""}</li>`).join("")
     : `<li class="empty">${keyword||tagFilter!=="すべて" ? "条件に合う温泉が見つかりません。言葉や絞り込みを変えてみてください。" : "この範囲には温泉がありません。地図を動かすか、縮小してみてください。"}</li>`;
 }
 map.on("moveend", ()=>{ if (!selected) renderList(); });
@@ -1022,6 +1042,10 @@ function showDetail(it){
     <button class="back" type="button" id="backBtn">‹ 一覧にもどる</button>
     <h2>${esc(it.name)}</h2>
     <div class="pills">${pills}</div>
+    <div class="subacts">
+      <button class="subact" type="button" id="favBtn" aria-pressed="${isFav(it)}">${isFav(it)?"★ 行きたい済み":"☆ 行きたい"}</button>
+      <button class="subact" type="button" id="shareBtn">共有する</button>
+    </div>
     <div class="actions">
       <a class="act primary" href="https://www.google.com/maps/dir/?api=1&destination=${it.lat},${it.lng}" target="_blank" rel="noopener">ルート案内</a>
       <a class="act stay" href="${esc(stayUrl(it))}" target="_blank" rel="noopener sponsored">近くの宿を探す</a>
@@ -1032,6 +1056,11 @@ function showDetail(it){
     <div class="note">${it.src==="sample" ? "地図上の位置は温泉街のおおよその中心です。" : !it.osm ? "地図上の位置は住所から求めたおおよその場所です。" : `地図データ：<a href="https://www.openstreetmap.org/${it.osm}" target="_blank" rel="noopener">OpenStreetMap</a>。営業時間や料金は公式情報をご確認ください。`}</div>`;
   $("#listView").style.display = "none"; $("#detail").hidden = false;
   $("#backBtn").addEventListener("click", closeDetail);
+  $("#favBtn").addEventListener("click", e => { toggleFav(it); const on = isFav(it); e.currentTarget.setAttribute("aria-pressed", on); e.currentTarget.textContent = on ? "★ 行きたい済み" : "☆ 行きたい"; toast(on ? "「行きたい」に追加しました" : "「行きたい」から外しました"); });
+  $("#shareBtn").addEventListener("click", async () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${it.lat},${it.lng}`, text = `${it.name}（${it.pref||""}）`;
+    try { if (navigator.share) await navigator.share({title:it.name, text, url}); else { await navigator.clipboard.writeText(`${text} ${url}`); toast("リンクをコピーしました"); } } catch {}
+  });
   setSheet(isWide() ? "peek" : "detail");
 }
 function closeDetail(){
@@ -1046,7 +1075,9 @@ function select(id, fly=true){
   setTimeout(()=>flyVisible([it.lat,it.lng], fly ? z : map.getZoom()), 30);
 }
 
-$("#chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if(!b) return; tagFilter = b.dataset.t; renderChips(); if (selected) closeDetail(); else render(); });
+$("#chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if(!b) return; tagFilter = b.dataset.t; renderChips(); if (selected) closeDetail(); else render();
+  // 「行きたい」を選んだら、保存した温泉が全部見えるように地図を合わせる。
+  if (tagFilter===FAVS) { const pts = filtered().map(it=>[it.lat,it.lng]); if (pts.length) { areaPref = ""; flying = true; map.flyToBounds(L.latLngBounds(pts).pad(.3), {maxZoom:11, duration:.6, paddingBottomRight:[0, sheetHeight()], paddingTopLeft:[0, isWide()?0:160]}); map.once("moveend", ()=>{ flying = false; renderList(); }); } } });
 $("#list").addEventListener("click", e => { const li = e.target.closest(".item"); if(li) select(li.dataset.id); });
 $("#list").addEventListener("keydown", e => { const li = e.target.closest(".item"); if(li && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); select(li.dataset.id); }});
 $("#q").addEventListener("input", e => { keyword = e.target.value.trim(); if (selected) closeDetail(); else render(); });
@@ -1097,7 +1128,7 @@ function locate(quiet){
 const REGIONS = [["北海道・東北",["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県"]],["関東",["茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県"]],
   ["中部",["新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県"]],["近畿",["三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県"]],
   ["中国・四国",["鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県"]],["九州・沖縄",["福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"]]];
-const showHome = () => !keyword && !areaPref && !here && !browsed && !selected;
+const showHome = () => tagFilter!==FAVS && !keyword && !areaPref && !here && !browsed && !selected;
 function renderPrefs(){
   const counts = {};
   items.forEach(it => { const p = (it.pref||"").match(/^.+?[都道府県]/)?.[0]; if (p) counts[p] = (counts[p]||0)+1; });
