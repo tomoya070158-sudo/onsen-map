@@ -1,7 +1,8 @@
 // App shell is cached for offline use; data/onsen.json is fetched fresh and falls back to cache.
-const CACHE = "yukemuri-v4";
+const CACHE = "yukemuri-v5";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png",
-  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"];
+  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

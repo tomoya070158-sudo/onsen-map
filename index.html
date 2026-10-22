@@ -672,6 +672,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* Layout: phone = full-screen map, floating search card on top, bottom sheet for list/detail.
    Desktop (>=820px) = left panel (search + sheet) beside the map. Palette: 藍 (indigo) + 朱 (vermilion) on a quiet map. */
 :root{
+  --top-h:150px;
   --bg:#f5f6f8; --panel:#ffffff; --ink:#1b2433; --muted:#5f6b7d; --line:#e2e6ed; --soft:#eef2f8;
   --accent:#24508f; --accent-ink:#ffffff; --hot:#d9482b; --hot-ink:#ffffff;
   --sea:#dde7f1; --land:#fafaf8; --border-land:#c3ccd8; --shadow:0 6px 24px rgba(20,32,56,.14);
@@ -724,14 +725,14 @@ button{font:inherit;color:inherit}
 .chip.fam[aria-pressed="false"]{border-color:color-mix(in srgb,var(--hot) 45%,var(--line));color:var(--hot)}
 
 /* Floating buttons */
-.fab{position:absolute;z-index:1000;transition:bottom .25s ease,opacity .2s;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(var(--sheet-h) + 12px);
+.fab{position:absolute;z-index:1002;transition:opacity .2s;right:max(12px,env(safe-area-inset-right,0px));top:calc(var(--top-h) + 22px);
   display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--panel);color:var(--accent);box-shadow:var(--shadow);padding:10px 14px;font-weight:700;cursor:pointer}
 .areabtn{position:absolute;z-index:1000;left:50%;transform:translateX(-50%);top:calc(150px + env(safe-area-inset-top,0px));border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow);padding:9px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
 .toast{position:absolute;z-index:1100;left:50%;transform:translateX(-50%);bottom:calc(var(--sheet-h) + 64px);background:var(--ink);color:var(--panel);border-radius:999px;padding:8px 14px;font-size:13px;max-width:calc(100% - 32px);text-align:center}
 
 /* Bottom sheet */
-.sheet{position:absolute;z-index:1001;left:0;right:0;bottom:0;height:var(--sheet-h);transition:height .25s ease;background:var(--panel);border-radius:18px 18px 0 0;box-shadow:0 -4px 20px rgba(20,32,56,.12);display:flex;flex-direction:column;min-height:0;padding-bottom:env(safe-area-inset-bottom,0px)}
-.handle{flex:none;border:0;background:transparent;padding:8px 0 4px;cursor:pointer;display:flex;justify-content:center}
+.sheet{position:absolute;z-index:1001;left:0;right:0;bottom:0;height:40vh;height:40dvh;transition:height .25s ease;background:var(--panel);border-radius:18px 18px 0 0;box-shadow:0 -4px 20px rgba(20,32,56,.12);display:flex;flex-direction:column;min-height:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+.handle{flex:none;border:0;background:transparent;padding:10px 0 8px;cursor:grab;display:flex;justify-content:center;touch-action:none;width:100%}
 .handle span{display:block;width:40px;height:5px;border-radius:3px;background:var(--line)}
 .sheethead{flex:none;display:flex;align-items:baseline;gap:8px;padding:2px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
 .sheethead b{font-size:16px}
@@ -745,6 +746,15 @@ button{font:inherit;color:inherit}
 .item .name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item .meta{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item .dist{flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.leaflet-cluster-anim .leaflet-marker-icon{transition:transform .3s ease-out,opacity .3s ease-in}
+.leaflet-cluster-spider-leg{transition:stroke-dashoffset .3s ease-out,stroke-opacity .3s ease-in}
+.pin,.clu{background:transparent;border:0}
+.pin i{display:block;box-sizing:border-box;width:16px;height:16px;margin:10px;border-radius:50%;background:var(--accent);border:2px solid var(--panel);box-shadow:0 1px 4px rgba(10,20,40,.35)}
+.pin.fam i{width:28px;height:28px;margin:4px;background:var(--hot);color:var(--hot-ink);font-style:normal;font-size:15px;line-height:24px;text-align:center}
+.pin.on i{width:28px;height:28px;margin:4px;border:3px solid var(--ink);box-shadow:0 0 0 4px color-mix(in srgb,var(--hot) 35%,transparent)}
+.pin.on:not(.fam) i{background:var(--hot)}
+.clu div{box-sizing:border-box;width:100%;height:100%;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;
+  background:var(--accent);color:var(--accent-ink);border:4px solid color-mix(in srgb,var(--accent) 30%,var(--panel));box-shadow:0 2px 8px rgba(10,20,40,.3);font-variant-numeric:tabular-nums}
 .empty{padding:20px 16px;color:var(--muted)}
 .home{flex:1;min-height:0;overflow:auto;padding:4px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
 .nearbtn{display:flex;align-items:center;gap:12px;text-align:left;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);padding:14px 16px;cursor:pointer}
@@ -757,7 +767,7 @@ button{font:inherit;color:inherit}
 .pref{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer;min-height:40px}
 .pref .n{color:var(--muted);font-size:11px;margin-left:4px;font-variant-numeric:tabular-nums}
 .sheethead .back{border:0;background:transparent;color:var(--accent);font-size:22px;line-height:1;padding:0 6px 0 0;cursor:pointer;align-self:center}
-.app[data-home="1"] .sheet[data-state="peek"]{height:56vh}
+.app[data-home="1"] .sheet[data-state="peek"]{height:56vh;height:56dvh}
 .app[data-home="1"] #sheethead,.app[data-home="1"] #list{display:none}
 .app:not([data-home="1"]) #home{display:none}
 
@@ -775,9 +785,10 @@ button{font:inherit;color:inherit}
 .act.wide{grid-column:1/-1}
 .note{font-size:12px;color:var(--muted)}
 
-.sheet[data-state="full"]{height:72vh}
 .app[data-sheet="full"] .fab{opacity:0;pointer-events:none}
-.sheet[data-state="detail"]{height:auto;max-height:70vh}
+.sheet[data-state="mini"]{height:calc(64px + env(safe-area-inset-bottom,0px))}
+.sheet[data-state="full"]{height:80vh;height:calc(100dvh - var(--top-h) - 24px)}
+.sheet[data-state="detail"]{height:auto;max-height:72vh;max-height:72dvh}
 
 @media (min-width:820px){
   :root{--sheet-h:0px}
@@ -788,7 +799,7 @@ button{font:inherit;color:inherit}
   .handle{display:none}
   .sheethead{padding-top:12px}
   .item{border-radius:10px;border-top:0;margin:0 8px}
-  .fab{bottom:20px;right:20px}
+  .fab{top:auto;bottom:20px;right:20px}
   .toast{bottom:24px;left:calc(50% + 200px)}
   .areabtn{top:20px;left:calc(50% + 200px)}
 }
@@ -833,6 +844,7 @@ button{font:inherit;color:inherit}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 <script>
 // 楽天アフィリエイトID。登録後にここへ入れると「宿を探す」が紹介料つきリンクになる。
 const RAKUTEN_AFFILIATE_ID = "";
@@ -854,13 +866,12 @@ let mode = "sample", live = false, items = SAMPLE.slice(), tagFilter = "すべ�
 const markers = new Map();
 let areaPref = "", browsed = false, flying = false;
 
-const map = L.map("map", {zoomControl:false, attributionControl:false, preferCanvas:true, minZoom:4}).setView([37.2, 137.8], 5);
+const map = L.map("map", {zoomControl:false, attributionControl:false, preferCanvas:true, minZoom:4, maxZoom:18}).setView([37.2, 137.8], 5);
 L.control.attribution({position:"bottomleft", prefix:false}).addTo(map);
 if (isWide()) L.control.zoom({position:"topright"}).addTo(map);
 map.createPane("base"); map.getPane("base").style.zIndex = 150;
 const baseLayer = L.geoJSON(JAPAN, {pane:"base", interactive:false, style:()=>({color:css("--border-land"),weight:.8,fillColor:css("--land"),fillOpacity:1})}).addTo(map);
 const tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:18, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'});
-const layer = L.layerGroup().addTo(map);
 let hereMarker = null;
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", ()=>{ baseLayer.setStyle({color:css("--border-land"),fillColor:css("--land")}); render(); });
 
@@ -879,10 +890,33 @@ const sheet = $("#sheet");
 function sheetHeight(){ return isWide() ? 0 : sheet.getBoundingClientRect().height; }
 function setSheet(state){
   sheet.dataset.state = state; $("#app").dataset.sheet = state;
-  requestAnimationFrame(()=>document.documentElement.style.setProperty("--sheet-h", isWide() ? "0px" : sheet.getBoundingClientRect().height+"px"));
-  setTimeout(()=>document.documentElement.style.setProperty("--sheet-h", isWide() ? "0px" : sheet.getBoundingClientRect().height+"px"), 280);
 }
-$("#handle").addEventListener("click", ()=> setSheet(sheet.dataset.state==="full" ? "peek" : sheet.dataset.state==="detail" ? "peek" : "full"));
+// --sheet-h / --top-h follow the real sizes so map controls and toasts never hide behind them.
+const syncSizes = () => {
+  document.documentElement.style.setProperty("--sheet-h", isWide() ? "0px" : sheet.getBoundingClientRect().height+"px");
+  document.documentElement.style.setProperty("--top-h", $(".top").getBoundingClientRect().bottom+"px");
+};
+new ResizeObserver(syncSizes).observe(sheet);
+new ResizeObserver(syncSizes).observe($(".top"));
+const ORDER = ["mini","peek","full"];
+function stepSheet(dir){
+  const cur = sheet.dataset.state==="detail" ? "peek" : sheet.dataset.state;
+  if (sheet.dataset.state==="detail" && dir>0) return setSheet("full");
+  setSheet(ORDER[Math.max(0, Math.min(2, ORDER.indexOf(cur)+dir))]);
+}
+$("#handle").addEventListener("click", ()=> { if (!dragMoved) stepSheet(sheet.dataset.state==="full" ? -1 : 1); });
+// Swipe the sheet's top edge up or down to open or lower the list.
+let dragY = null, dragMoved = false;
+for (const el of [$("#handle"), $("#sheethead")]) {
+  el.addEventListener("pointerdown", e => { dragY = e.clientY; dragMoved = false; });
+}
+addEventListener("pointermove", e => { if (dragY!=null && Math.abs(e.clientY-dragY) > 8) dragMoved = true; });
+addEventListener("pointerup", e => {
+  if (dragY==null) return;
+  const dy = e.clientY - dragY; dragY = null;
+  if (Math.abs(dy) > 30) stepSheet(dy < 0 ? 1 : -1);
+  setTimeout(()=>dragMoved = false, 0);
+});
 map.on("dragstart", ()=>{ if (sheet.dataset.state==="full") setSheet("peek"); areaPref = ""; browsed = true; });
 map.on("zoomstart", e=>{ if (!flying) browsed = true; });
 
@@ -926,18 +960,33 @@ function renderChips(){
   $("#chips").innerHTML = tags.map(t => `<button type="button" class="chip${t===FAMOUS?" fam":""}" aria-pressed="${t===tagFilter}" data-t="${esc(t)}">${t===FAMOUS?"♨ ":""}${esc(t)}<span class="n">${(t==="すべて"?items.length:counts[t]).toLocaleString()}</span></button>`).join("");
 }
 
+// Facilities go into a cluster layer (numbered bubbles that open on tap); famous areas stay as ♨ pins on top.
+// Every pin has a 36px tap area, so it can be hit with a finger even when the dot itself is small.
+const cluster = L.markerClusterGroup({maxClusterRadius:48, disableClusteringAtZoom:14, showCoverageOnHover:false, spiderfyOnMaxZoom:true, chunkedLoading:true,
+  iconCreateFunction: c => { const n = c.getChildCount(), s = n<10?34:n<100?42:n<1000?50:58;
+    return L.divIcon({className:"clu", html:`<div>${n.toLocaleString()}</div>`, iconSize:[s,s]}); }}).addTo(map);
+const famLayer = L.layerGroup().addTo(map);
+function iconFor(it){
+  const fam = it.src==="sample", on = selected===it.id;
+  return L.divIcon({className:`pin${fam?" fam":""}${on?" on":""}`, html:fam?"<i>♨</i>":"<i></i>", iconSize:[36,36]});
+}
+function markerFor(it){
+  let m = markers.get(it.id);
+  if (!m) { m = L.marker([it.lat,it.lng], {icon:iconFor(it), keyboard:false, riseOnHover:true, zIndexOffset:it.src==="sample"?500:0}).on("click", ()=>select(it.id, false)); markers.set(it.id, m); }
+  return m;
+}
+let lastSig = "", lastSel = null;
 function render(){
   const all = filtered();
-  layer.clearLayers(); markers.clear();
-  const accent = css("--accent"), hot = css("--hot"), panel = css("--panel"), ink = css("--ink"), mixed = mode!=="sample";
-  // Dots shrink when zoomed out so the whole country stays readable; famous areas are drawn on top.
-  const z = map.getZoom(), osmR = z<=6 ? 2.5 : z<=8 ? 3.5 : 5.5, famR = z<=6 ? 5 : z<=8 ? 6.5 : 8;
-  all.slice().sort((a,b)=>(a.src==="sample")-(b.src==="sample") || (a.id===selected)-(b.id===selected)).forEach(it => {
-    const on = selected===it.id, fam = it.src==="sample";
-    const m = L.circleMarker([it.lat,it.lng], {radius:on?11:(fam?famR:(mixed?osmR:6)), color:on?ink:panel, weight:on?3:1.5,
-      fillColor:fam?hot:accent, fillOpacity:fam||on?1:.85}).on("click", ()=>select(it.id, false));
-    m.addTo(layer); markers.set(it.id, m);
-  });
+  const sig = [mode, items.length, tagFilter, keyword].join("|");
+  if (sig !== lastSig) {
+    lastSig = sig; cluster.clearLayers(); famLayer.clearLayers();
+    cluster.addLayers(all.filter(it => it.src!=="sample").map(markerFor));
+    all.filter(it => it.src==="sample").forEach(it => markerFor(it).addTo(famLayer));
+  }
+  // Only the previously and newly selected pins change look.
+  [lastSel, selected].forEach(id => { const it = id && items.find(x=>x.id===id), m = id && markers.get(id); if (it && m) { m.setIcon(iconFor(it)); m.setZIndexOffset(id===selected?1000:it.src==="sample"?500:0); } });
+  lastSel = selected;
   renderList(all);
 }
 
@@ -953,7 +1002,7 @@ function renderList(all = filtered()){
 }
 map.on("moveend", ()=>{ if (!selected) renderList(); });
 let lastZ = map.getZoom();
-map.on("zoomend", ()=>{ const z = map.getZoom(), band = v => v<=6?0:v<=8?1:2; if (band(z)!==band(lastZ)) render(); lastZ = z; });
+
 
 function showDetail(it){
   const q = encodeURIComponent(it.name), p = encodeURIComponent(it.pref||"");
@@ -1000,7 +1049,9 @@ $("#searchForm").addEventListener("submit", async e => {
   const hit = filtered();
   if (hit.length) {
     const fam = hit.filter(h=>h.src==="sample");
-    if (hit.length===1 || fam.length===1) { select((fam[0]||hit[0]).id); return; }
+    // "熱海" should open 熱海温泉 directly, even though 磐梯熱海温泉 also matches.
+    const lead = fam.find(h=>h.name.startsWith(q)) || (fam.length===1 && fam[0]) || (hit.length===1 && hit[0]);
+    if (lead) { select(lead.id); return; }
     map.flyToBounds(L.latLngBounds(hit.map(h=>[h.lat,h.lng])).pad(.2), {maxZoom:live?12:9, duration:.6, paddingBottomRight:[0, sheetHeight()]});
     setSheet("peek"); return;
   }
@@ -1129,7 +1180,7 @@ async function start(){
   try { const st = await navigator.permissions?.query({name:"geolocation"}); if (st?.state === "granted") locate(true); } catch {}
 }
 start();
-addEventListener("resize", ()=>setSheet(sheet.dataset.state));
+addEventListener("resize", syncSizes);
 
 if ("serviceWorker" in navigator && location.protocol === "https:" && /github\.io$|pages\.dev$|netlify\.app$/.test(location.hostname)) {
   navigator.serviceWorker.register("sw.js").catch(()=>{});
