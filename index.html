@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#24508f"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ゆけむり"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#24508f"><meta name="color-scheme" content="light"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ゆけむり"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
 <title>ゆけむりマップ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -676,21 +676,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --bg:#f5f6f8; --panel:#ffffff; --ink:#1b2433; --muted:#5f6b7d; --line:#e2e6ed; --soft:#eef2f8;
   --accent:#24508f; --accent-ink:#ffffff; --hot:#d9482b; --hot-ink:#ffffff;
   --sea:#dde7f1; --land:#fafaf8; --border-land:#c3ccd8; --shadow:0 6px 24px rgba(20,32,56,.14);
-  --tile-filter:saturate(.35) brightness(1.04) contrast(.95);
+  --tile-filter:none;
   --f-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
   --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
   --sheet-h:38vh;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f141c; --panel:#171e29; --ink:#e7ecf3; --muted:#9aa7b8; --line:#28324a; --soft:#1f2836;
-  --accent:#86aef0; --accent-ink:#0b1220; --hot:#ff7a55; --hot-ink:#1a0b06;
-  --sea:#0c131c; --land:#1a222e; --border-land:#33415a; --shadow:0 6px 24px rgba(0,0,0,.45);
-  --tile-filter:invert(1) hue-rotate(180deg) saturate(.3) brightness(.85) contrast(.9); color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0f141c; --panel:#171e29; --ink:#e7ecf3; --muted:#9aa7b8; --line:#28324a; --soft:#1f2836;
-  --accent:#86aef0; --accent-ink:#0b1220; --hot:#ff7a55; --hot-ink:#1a0b06;
-  --sea:#0c131c; --land:#1a222e; --border-land:#33415a; --shadow:0 6px 24px rgba(0,0,0,.45);
-  --tile-filter:invert(1) hue-rotate(180deg) saturate(.3) brightness(.85) contrast(.9); color-scheme:dark}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;overflow:hidden}
 button{font:inherit;color:inherit}
@@ -727,7 +718,7 @@ button{font:inherit;color:inherit}
 /* Floating buttons */
 .fab{position:absolute;z-index:1002;transition:opacity .2s;right:max(12px,env(safe-area-inset-right,0px));top:calc(var(--top-h) + 22px);
   display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--panel);color:var(--accent);box-shadow:var(--shadow);padding:10px 14px;font-weight:700;cursor:pointer}
-.areabtn{position:absolute;z-index:1000;left:50%;transform:translateX(-50%);top:calc(150px + env(safe-area-inset-top,0px));border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow);padding:9px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
+.areabtn{position:absolute;z-index:1000;left:50%;transform:translateX(-50%);top:calc(var(--top-h) + 14px);border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow);padding:9px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
 .toast{position:absolute;z-index:1100;left:50%;transform:translateX(-50%);bottom:calc(var(--sheet-h) + 64px);background:var(--ink);color:var(--panel);border-radius:999px;padding:8px 14px;font-size:13px;width:max-content;max-width:calc(100% - 32px);text-align:center}
 
 /* Bottom sheet */
@@ -770,7 +761,6 @@ button{font:inherit;color:inherit}
 .pref{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer;min-height:40px}
 .pref .n{color:var(--muted);font-size:11px;margin-left:4px;font-variant-numeric:tabular-nums}
 .sheethead .back{border:0;background:transparent;color:var(--accent);font-size:22px;line-height:1;padding:0 6px 0 0;cursor:pointer;align-self:center}
-.app[data-home="1"] .sheet[data-state="peek"]{height:56vh;height:56dvh}
 .app[data-home="1"] #sheethead,.app[data-home="1"] #list{display:none}
 .app:not([data-home="1"]) #home{display:none}
 
@@ -792,11 +782,34 @@ button{font:inherit;color:inherit}
 .item .fav{flex:none;color:var(--gold,#e0a100);font-size:14px}
 .chip.favchip[aria-pressed="false"]{border-color:color-mix(in srgb,var(--gold,#e0a100) 55%,var(--line))}
 .note{font-size:12px;color:var(--muted)}
+.homehead{font-weight:700;font-size:16px;padding:2px 110px 0 0;min-height:30px}
+.srcnote2{font-size:11px;color:var(--muted);text-align:center}
+.homeprefs{display:flex;flex-direction:column;gap:10px}
+/* 日本全体まで縮小したときは ♨ を小さくして重なりを減らす */
+.far .pin.fam i{width:18px;height:18px;margin:9px;font-size:10px;line-height:14px;border-width:2px}
+
+/* スマホ：地図を広く見せる（見出しを省き、下の一覧を低めに） */
+@media (max-width:819px){
+  .brandrow{display:none}
+  .top{padding:8px;gap:6px;border-radius:14px}
+  .search input{padding:8px 4px}
+  .search .go{padding:7px 12px}
+  .chip{padding:4px 11px}
+  .sheet{height:36vh;height:36dvh}
+  #app[data-home="1"] .sheet[data-state="peek"]{height:46vh;height:46dvh}
+  .home{gap:10px}
+  .nearbtn{padding:11px 14px}
+  .nearbtn b{font-size:16px}
+  .region h3{font-size:11px}
+  .pref{padding:5px 10px;min-height:36px;font-size:13px;border-radius:9px}
+  .fab{padding:9px 13px}
+}
 
 .app[data-sheet="full"] .fab{opacity:0;pointer-events:none}
 .sheet[data-state="mini"]{height:calc(64px + env(safe-area-inset-bottom,0px))}
 .sheet[data-state="full"]{height:80vh;height:calc(100dvh - var(--top-h) - 24px)}
 .sheet[data-state="detail"]{height:auto;max-height:72vh;max-height:72dvh}
+.app[data-home="1"] .sheet[data-state="peek"]{height:56vh;height:56dvh}
 
 @media (min-width:820px){
   :root{--sheet-h:0px}
@@ -840,12 +853,14 @@ button{font:inherit;color:inherit}
     <button class="sizebtn" id="sizeBtn" type="button">小さく ⌄</button>
     <div id="listView" style="display:flex;flex-direction:column;min-height:0;flex:1">
       <div class="home" id="home">
+        <div class="homehead">どこの温泉をさがしますか？</div>
         <button class="nearbtn" id="nearBtn" type="button">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
           <span><b>近くの温泉をさがす</b><small>今いる場所から近い順に並べます</small></span>
         </button>
         <div class="homelabel">都道府県からさがす</div>
-        <div class="prefs" id="prefs"></div>
+        <div class="prefs homeprefs" id="prefs"></div>
+        <div class="srcnote2" id="srcnote2"></div>
       </div>
       <div class="sheethead" id="sheethead"><button class="back" type="button" id="homeBtn" hidden>‹</button><b id="listTitle">この周辺の温泉</b><span id="count"></span></div>
       <ul class="list" id="list"></ul>
@@ -878,14 +893,26 @@ let mode = "sample", live = false, items = SAMPLE.slice(), tagFilter = "すべ�
 const markers = new Map();
 let areaPref = "", browsed = false, flying = false;
 
-const map = L.map("map", {zoomControl:false, attributionControl:false, preferCanvas:true, minZoom:4, maxZoom:18}).setView([37.2, 137.8], 5);
+// 前回見ていた場所（中心とズーム）を端末に覚えておき、次に開いたときはそこから始める。
+const JAPAN_VIEW = [[37.2, 137.8], 5];
+let savedView = null;
+try { const v = JSON.parse(localStorage.getItem("view")||"null"); if (v && isFinite(v.lat) && isFinite(v.lng) && isFinite(v.z)) savedView = v; } catch {}
+const map = L.map("map", {zoomControl:false, attributionControl:false, preferCanvas:true, minZoom:4, maxZoom:18})
+  .setView(savedView ? [savedView.lat, savedView.lng] : JAPAN_VIEW[0], savedView ? savedView.z : JAPAN_VIEW[1]);
+let viewReady = false;
+map.on("moveend", ()=>{ if (!viewReady) return; const c = map.getCenter();
+  try { localStorage.setItem("view", JSON.stringify({lat:+c.lat.toFixed(4), lng:+c.lng.toFixed(4), z:map.getZoom()})); } catch {} });
+// 日本全体くらいまで縮小したら ♨ を小さくする
+const syncFar = () => map.getContainer().classList.toggle("far", map.getZoom() < 7);
+map.on("zoomend", syncFar); syncFar();
 L.control.attribution({position:"bottomleft", prefix:false}).addTo(map);
 if (isWide()) L.control.zoom({position:"topright"}).addTo(map);
 map.createPane("base"); map.getPane("base").style.zIndex = 150;
 const baseLayer = L.geoJSON(JAPAN, {pane:"base", interactive:false, style:()=>({color:css("--border-land"),weight:.8,fillColor:css("--land"),fillOpacity:1})}).addTo(map);
-const tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:18, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'});
+// 背景は国土地理院の淡色地図（明るく、地名が日本語）。読み込めない場所では下の日本の形が見える。
+const tiles = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {maxZoom:18, minNativeZoom:5, maxNativeZoom:18,
+  attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院</a> ／ 温泉データ &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
 let hereMarker = null;
-matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", ()=>{ baseLayer.setStyle({color:css("--border-land"),fillColor:css("--land")}); render(); });
 
 function km(a, b){
   const r = Math.PI/180, dLat = (b.lat-a.lat)*r, dLng = (b.lng-a.lng)*r;
@@ -1077,7 +1104,7 @@ function select(id, fly=true){
 
 $("#chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if(!b) return; tagFilter = b.dataset.t; renderChips(); if (selected) closeDetail(); else render();
   // 「行きたい」を選んだら、保存した温泉が全部見えるように地図を合わせる。
-  if (tagFilter===FAVS) { const pts = filtered().map(it=>[it.lat,it.lng]); if (pts.length) { areaPref = ""; flying = true; map.flyToBounds(L.latLngBounds(pts).pad(.3), {maxZoom:11, duration:.6, paddingBottomRight:[0, sheetHeight()], paddingTopLeft:[0, isWide()?0:160]}); map.once("moveend", ()=>{ flying = false; renderList(); }); } } });
+  if (tagFilter===FAVS) { const pts = filtered().map(it=>[it.lat,it.lng]); if (pts.length) { areaPref = ""; flying = true; map.flyToBounds(L.latLngBounds(pts).pad(.3), {maxZoom:11, duration:.6, paddingBottomRight:[0, sheetHeight()], paddingTopLeft:[0, isWide()?0:$(".top").getBoundingClientRect().bottom+8]}); map.once("moveend", ()=>{ flying = false; renderList(); }); } } });
 $("#list").addEventListener("click", e => { const li = e.target.closest(".item"); if(li) select(li.dataset.id); });
 $("#list").addEventListener("keydown", e => { const li = e.target.closest(".item"); if(li && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); select(li.dataset.id); }});
 $("#q").addEventListener("input", e => { keyword = e.target.value.trim(); if (selected) closeDetail(); else render(); });
@@ -1110,7 +1137,7 @@ $("#searchForm").addEventListener("submit", async e => {
 
 $("#locBtn").addEventListener("click", () => locate());
 $("#nearBtn").addEventListener("click", () => locate());
-function locate(quiet){
+function locate(quiet, first){
   if (!navigator.geolocation) { if (!quiet) toast("この端末では現在地を使えません"); return; }
   if (!quiet) toast("現在地を確認しています…", 0);
   navigator.geolocation.getCurrentPosition(pos => {
@@ -1121,7 +1148,7 @@ function locate(quiet){
     keyword = ""; $("#q").value = ""; areaPref = "";
     flyVisible([here.lat,here.lng], mode==="sample" && !live ? 8 : 11);
     map.once("moveend", ()=>{ if (mode==="live") searchArea(); else render(); });
-  }, () => { if (!quiet) toast("現在地を取得できませんでした。位置情報の許可を確認してください"); }, {enableHighAccuracy:true, timeout:10000});
+  }, () => { if (first) toast("下の一覧から都道府県を選ぶと、その場所から始めます", 5000); else if (!quiet) toast("現在地を取得できませんでした。位置情報の許可を確認してください"); }, {enableHighAccuracy:true, timeout:10000});
 }
 
 /* ---------- home: nearby + prefectures ---------- */
@@ -1141,12 +1168,12 @@ $("#prefs").addEventListener("click", e => {
   const pts = items.filter(it => (it.pref||"").startsWith(areaPref)).map(it => [it.lat,it.lng]);
   const bounds = f ? L.geoJSON(f).getBounds() : pts.length ? L.latLngBounds(pts) : null;
   render();
-  if (bounds) { flying = true; map.flyToBounds(bounds, {duration:.6, paddingBottomRight:[0, sheetHeight()], paddingTopLeft:[0, isWide()?0:160]}); map.once("moveend", ()=>{ flying = false; }); }
+  if (bounds) { flying = true; map.flyToBounds(bounds, {duration:.6, paddingBottomRight:[0, sheetHeight()], paddingTopLeft:[0, isWide()?0:$(".top").getBoundingClientRect().bottom+8]}); map.once("moveend", ()=>{ flying = false; }); }
 });
 $("#homeBtn").addEventListener("click", () => {
+  // 地図はそのままにして、「どこの温泉をさがしますか？」の画面に戻るだけ（日本全体には戻さない）。
   areaPref = ""; keyword = ""; $("#q").value = ""; here = null; browsed = false; hereMarker?.remove();
-  flying = true; map.flyTo([37.2, 137.8], 5, {duration:.6}); map.once("moveend", ()=>{ flying = false; render(); });
-  render();
+  setSheet("peek"); render();
 });
 
 function kindOf(t){
@@ -1206,18 +1233,24 @@ async function start(){
   setSheet("peek"); renderChips(); render();
   const [snap, net] = await Promise.all([loadSnapshot(), detectLive()]);
   live = net;
-  if (live) tiles.addTo(map);
   if (snap) {
-    $("#srcnote").textContent = `全国 ${items.length.toLocaleString()}件・${snapshotDate}更新`;
+    $("#srcnote").textContent = $("#srcnote2").textContent = `全国 ${items.length.toLocaleString()}件・${snapshotDate}更新`;
   } else if (live) {
     $("#srcnote").textContent = "地図の範囲から検索";
     $("#areaBtn").hidden = false;
   } else {
     $("#srcnote").textContent = `プレビュー版・${SAMPLE.length}か所`;
   }
+  // 前回の場所から始めるときは、一覧も「この周辺の温泉」にしておく。
+  if (savedView) browsed = true;
+  viewReady = true;
   renderChips(); renderPrefs(); render();
-  // If location was allowed before, go straight to what is nearby.
-  try { const st = await navigator.permissions?.query({name:"geolocation"}); if (st?.state === "granted") locate(true); } catch {}
+  // 位置情報が許可済みなら現在地の周りへ。初めて開いたときだけ、こちらから一度たずねる。
+  let geo = "";
+  try { geo = (await navigator.permissions?.query({name:"geolocation"}))?.state || ""; } catch {}
+  if (geo === "granted") locate(true);
+  else if (!savedView && geo !== "denied") { let asked = false; try { asked = !!localStorage.getItem("askedGeo"); localStorage.setItem("askedGeo","1"); } catch {}
+    if (!asked) locate(false, true); }
 }
 start();
 addEventListener("resize", syncSizes);
